@@ -22,10 +22,10 @@ export class Bee
         this.cursors = cursors;
     }
 
-    update (dt: number, bounds: { width: number; height: number }): void
+    update (dt: number, wrapRect: Phaser.Geom.Rectangle): void
     {
         this.handleInput(dt);
-        this.wrap(bounds);
+        this.wrap(wrapRect);
     }
 
     private ensureAnimation (scene: Scene): void
@@ -69,12 +69,8 @@ export class Bee
         }
     }
 
-    private wrap (bounds: { width: number; height: number }): void
+    private wrap (wrapRect: Phaser.Geom.Rectangle): void
     {
-        if (this.sprite.x < 0) this.sprite.x = bounds.width;
-        else if (this.sprite.x > bounds.width) this.sprite.x = 0;
-
-        if (this.sprite.y < 0) this.sprite.y = bounds.height;
-        else if (this.sprite.y > bounds.height) this.sprite.y = 0;
+        Phaser.Actions.WrapInRectangle([this.sprite], wrapRect);
     }
 }

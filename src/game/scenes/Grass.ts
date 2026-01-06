@@ -7,6 +7,7 @@ export class Grass extends Scene
     private bee?: Bee;
     private cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
     private readonly grassTileScale = 0.25;
+    private wrapRect?: Phaser.Geom.Rectangle;
 
     constructor ()
     {
@@ -18,6 +19,7 @@ export class Grass extends Scene
         this.createBackground();
         this.cursors = this.input.keyboard?.createCursorKeys();
         this.createBee();
+        this.createWrapRect();
 
         this.input.keyboard?.once('keydown-ESC', () => {
             this.scene.start(SCENE_KEYS.MainMenu);
@@ -28,7 +30,10 @@ export class Grass extends Scene
     {
         const dt = delta / 1000;
 
-        this.bee?.update(dt, this.scale.gameSize);
+        if (this.wrapRect)
+        {
+            this.bee?.update(dt, this.wrapRect);
+        }
     }
 
     private createBackground (): void
@@ -36,6 +41,12 @@ export class Grass extends Scene
         const { width, height } = this.scale.gameSize;
         const grass = this.add.tileSprite(0, 0, width, height, ASSET_KEYS.Grass).setOrigin(0);
         grass.setTileScale(this.grassTileScale, this.grassTileScale);
+    }
+
+    private createWrapRect (): void
+    {
+        const { width, height } = this.scale.gameSize;
+        this.wrapRect = new Phaser.Geom.Rectangle(0, 0, width, height);
     }
 
     private createBee (): void

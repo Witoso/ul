@@ -26,5 +26,10 @@ export class MainMenu extends Scene
             stroke: '#000000', strokeThickness: 6,
             align: 'center'
         }).setOrigin(0.5);
+
+        this.startButton.setInteractive({ useHandCursor: true });
+        this.startButton.once('pointerdown', () => {
+            this.scene.start('Grass');
+        });
     }
 }

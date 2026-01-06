@@ -7,7 +7,7 @@ export class Bee
     private cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
     private readonly flySpeed = 220;
     private readonly turnSpeed = 2.5;
-    private readonly scale = 0.2;
+    private readonly scale = 0.15;
 
     constructor (scene: Scene, x: number, y: number)
     {

@@ -1,76 +1,47 @@
 import { Scene } from 'phaser';
+import { ASSET_KEYS, SCENE_KEYS } from '../constants';
+import { Bee } from '../objects/Bee';
 
 export class Grass extends Scene
 {
-    private bee?: Phaser.GameObjects.Sprite;
+    private bee?: Bee;
     private cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
-    private speed = 220;
-    private turnSpeed = 2.5;
+    private readonly grassTileScale = 0.25;
 
     constructor ()
     {
-        super('Grass');
+        super(SCENE_KEYS.Grass);
     }
 
     create ()
     {
-        const { width, height } = this.scale.gameSize;
-
-        const grass = this.add.tileSprite(0, 0, width, height, 'grass').setOrigin(0);
-        grass.setTileScale(0.25, 0.25);
-
-        if (!this.anims.exists('bee-fly'))
-        {
-            this.anims.create({
-                key: 'bee-fly',
-                frames: [{ key: 'bee1' }, { key: 'bee2' }],
-                frameRate: 8,
-                repeat: -1
-            });
-        }
-
-        this.bee = this.add.sprite(width * 0.5, height * 0.5, 'bee1');
-        this.bee.setOrigin(0.5).setScale(0.2).play('bee-fly');
-
+        this.createBackground();
         this.cursors = this.input.keyboard?.createCursorKeys();
+        this.createBee();
 
         this.input.keyboard?.once('keydown-ESC', () => {
-            this.scene.start('MainMenu');
+            this.scene.start(SCENE_KEYS.MainMenu);
         });
     }
 
     update (_time: number, delta: number)
     {
-        if (!this.bee || !this.cursors)
-        {
-            return;
-        }
-
         const dt = delta / 1000;
-        const { left, right, up } = this.cursors;
 
-        if (left?.isDown)
-        {
-            this.bee.rotation -= this.turnSpeed * dt;
-        }
-        else if (right?.isDown)
-        {
-            this.bee.rotation += this.turnSpeed * dt;
-        }
+        this.bee?.update(dt, this.scale.gameSize);
+    }
 
-        if (up?.isDown)
-        {
-            const heading = this.bee.rotation - Math.PI / 2;
-            this.bee.x += Math.cos(heading) * this.speed * dt;
-            this.bee.y += Math.sin(heading) * this.speed * dt;
-        }
-
+    private createBackground (): void
+    {
         const { width, height } = this.scale.gameSize;
+        const grass = this.add.tileSprite(0, 0, width, height, ASSET_KEYS.Grass).setOrigin(0);
+        grass.setTileScale(this.grassTileScale, this.grassTileScale);
+    }
 
-        if (this.bee.x < 0) this.bee.x = width;
-        else if (this.bee.x > width) this.bee.x = 0;
-
-        if (this.bee.y < 0) this.bee.y = height;
-        else if (this.bee.y > height) this.bee.y = 0;
+    private createBee (): void
+    {
+        const { width, height } = this.scale.gameSize;
+        this.bee = new Bee(this, width * 0.5, height * 0.5);
+        this.bee.setControls(this.cursors);
     }
 }

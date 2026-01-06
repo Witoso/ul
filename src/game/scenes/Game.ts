@@ -1,4 +1,5 @@
 import { Scene } from 'phaser';
+import { ASSET_KEYS, SCENE_KEYS } from '../constants';
 
 export class Game extends Scene
 {
@@ -8,7 +9,7 @@ export class Game extends Scene
 
     constructor ()
     {
-        super('Game');
+        super(SCENE_KEYS.Game);
     }
 
     create ()
@@ -16,7 +17,7 @@ export class Game extends Scene
         this.camera = this.cameras.main;
         this.camera.setBackgroundColor(0x00ff00);
 
-        this.background = this.add.image(512, 384, 'background');
+        this.background = this.add.image(512, 384, ASSET_KEYS.Background);
         this.background.setAlpha(0.5);
 
         this.msg_text = this.add.text(512, 384, 'Make something fun!\nand share it with us:\nsupport@phaser.io', {

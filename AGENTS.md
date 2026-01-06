@@ -21,5 +21,11 @@
 - Small commits are OK when asked to commit.
 - If you need assets (sprites, audio, etc.), ask before inventing them.
 
+## Architecture Notes
+- Keep scene keys, asset keys, and animation keys centralized in `src/game/constants.ts` to avoid string drift.
+- Prefer small helper methods in scenes (e.g., `createBackground`, `createBee`, `handleInput`, `wrapBee`) for clarity.
+- Use the standard Phaser scene lifecycle (`init`, `preload`, `create`, `update`) and keep input/movement in `update`.
+- For game objects (bee, flowers, beehive), prefer small classes in `src/game/objects/` with `update()` and scene-owned construction.
+
 ## Scope
 - Work only within this repository.

@@ -7,6 +7,7 @@
 ## Specs First
 - We will create a spec before major changes.
 - Use the `specs/` folder for specs.
+- Name each spec file with a leading number and short description, e.g., `01-info-and-more.md`.
 
 ## Stack
 - Phaser 3 + Vite + TypeScript.

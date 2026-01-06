@@ -1,5 +1,14 @@
 # Phaser Vite TypeScript Template
 
+## Our Game
+We are making a kid-friendly 2D game about a bee flying around, seen from above (top-down view).
+
+## Top-Down Setup Notes
+- The game uses a fixed canvas size (see `src/game/main.ts`) and is centered on the page.
+- Scenes use world coordinates with (0, 0) in the top-left and x/y growing to the right and down.
+- Tiled backgrounds (like grass) should be sized to the game width/height so they fill the screen.
+- Helpful docs: https://docs.phaser.io/api-documentation/class/gameobjects-tilesprite and https://docs.phaser.io/api-documentation/class/cameras-scene2d-camera
+
 This is a Phaser 3 project template that uses Vite for bundling. It supports hot-reloading for quick development workflow, includes TypeScript support and scripts to generate production-ready builds.
 
 **[This Template is also available as a JavaScript version.](https://github.com/phaserjs/template-vite)**

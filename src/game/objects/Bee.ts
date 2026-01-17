@@ -8,6 +8,7 @@ export class Bee
     private readonly flySpeed = 220;
     private readonly turnSpeed = 2.5;
     private readonly scale = 0.15;
+    private carriedFlowerKey?: string;
 
     constructor (scene: Scene, x: number, y: number)
     {
@@ -26,6 +27,34 @@ export class Bee
     {
         this.handleInput(dt);
         this.wrap(wrapRect);
+    }
+
+    hasFlower (): boolean
+    {
+        return Boolean(this.carriedFlowerKey);
+    }
+
+    pickUpFlower (flowerKey: string): boolean
+    {
+        if (this.carriedFlowerKey)
+        {
+            return false;
+        }
+
+        this.carriedFlowerKey = flowerKey;
+        return true;
+    }
+
+    dropOffFlower (): string | undefined
+    {
+        const key = this.carriedFlowerKey;
+        this.carriedFlowerKey = undefined;
+        return key;
+    }
+
+    getBounds (output?: Phaser.Geom.Rectangle): Phaser.Geom.Rectangle
+    {
+        return this.sprite.getBounds(output);
     }
 
     private ensureAnimation (scene: Scene): void

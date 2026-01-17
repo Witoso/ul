@@ -37,6 +37,13 @@ export class Preloader extends Scene
         this.load.image(ASSET_KEYS.Grass, 'grass.png');
         this.load.image(ASSET_KEYS.Bee1, 'bee1.png');
         this.load.image(ASSET_KEYS.Bee2, 'bee2.png');
+        this.load.image(ASSET_KEYS.Beehive, 'beehive.png');
+        this.load.image(ASSET_KEYS.Clover, 'clover.png');
+        this.load.image(ASSET_KEYS.Daisy, 'daisy.png');
+        this.load.image(ASSET_KEYS.Dandelion, 'dandelion.png');
+        this.load.image(ASSET_KEYS.Lavender, 'lavender.png');
+        this.load.image(ASSET_KEYS.Sunflower, 'sunflower.png');
+        this.load.image(ASSET_KEYS.Pollen, 'pollen.png');
     }
 
     create ()

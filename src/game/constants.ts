@@ -12,7 +12,14 @@ export const ASSET_KEYS = {
     Logo: 'logo',
     Grass: 'grass',
     Bee1: 'bee1',
-    Bee2: 'bee2'
+    Bee2: 'bee2',
+    Beehive: 'beehive',
+    Clover: 'clover',
+    Daisy: 'daisy',
+    Dandelion: 'dandelion',
+    Lavender: 'lavender',
+    Sunflower: 'sunflower',
+    Pollen: 'pollen'
 } as const;
 
 export const ANIM_KEYS = {

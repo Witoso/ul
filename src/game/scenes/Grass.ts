@@ -13,13 +13,17 @@ export class Grass extends Scene
     private beehive?: Beehive;
     private flowers: Flower[] = [];
     private readonly boardMargin = 40;
-    private readonly beehiveSpacing = 80;
+    private readonly beehiveSpacing = 140;
     private readonly flowerSpacing = 60;
     private readonly flowersCount = 5;
     private readonly beehiveScale = 0.2;
     private readonly flowerScale = 0.3;
     private readonly pollenScale = 0.25;
     private readonly pollenCount = 6;
+    private readonly beeDepth = 2;
+    private readonly timerDepth = 1;
+    private readonly timerPadding = 12;
+    private readonly timerUpdateMs = 100;
     private readonly flowerKeys = [
         ASSET_KEYS.Clover,
         ASSET_KEYS.Daisy,
@@ -27,6 +31,10 @@ export class Grass extends Scene
         ASSET_KEYS.Lavender,
         ASSET_KEYS.Sunflower
     ];
+    private timerText?: Phaser.GameObjects.Text;
+    private timerEvent?: Phaser.Time.TimerEvent;
+    private timerStartMs?: number;
+    private finalTimeSeconds?: number;
 
     constructor ()
     {
@@ -36,6 +44,8 @@ export class Grass extends Scene
     create ()
     {
         this.createBackground();
+        this.createTimerText();
+        this.startTimer();
         this.cursors = this.input.keyboard?.createCursorKeys();
         this.createBeehive();
         this.createFlowers();
@@ -78,6 +88,64 @@ export class Grass extends Scene
         const { width, height } = this.scale.gameSize;
         this.bee = new Bee(this, width * 0.5, height * 0.5);
         this.bee.setControls(this.cursors);
+        this.bee.setDepth(this.beeDepth);
+    }
+
+    private createTimerText (): void
+    {
+        this.timerText = this.add.text(this.timerPadding, this.timerPadding, 'Time: 0.0s', {
+            fontFamily: 'Arial Black',
+            fontSize: 18,
+            color: '#2b2b2b'
+        });
+        this.timerText.setAlpha(0.6);
+        this.timerText.setDepth(this.timerDepth);
+    }
+
+    private startTimer (): void
+    {
+        this.timerStartMs = this.time.now;
+        this.timerEvent = this.time.addEvent({
+            delay: this.timerUpdateMs,
+            loop: true,
+            callback: () => {
+                this.updateTimerText();
+            }
+        });
+        this.updateTimerText();
+    }
+
+    private stopTimer (): void
+    {
+        if (!this.timerEvent || this.finalTimeSeconds !== undefined)
+        {
+            return;
+        }
+
+        this.finalTimeSeconds = this.getElapsedSeconds();
+        this.timerEvent.paused = true;
+        this.updateTimerText();
+    }
+
+    private getElapsedSeconds (): number
+    {
+        if (this.timerStartMs === undefined)
+        {
+            return 0;
+        }
+
+        return (this.time.now - this.timerStartMs) / 1000;
+    }
+
+    private updateTimerText (): void
+    {
+        if (!this.timerText)
+        {
+            return;
+        }
+
+        const elapsedSeconds = this.finalTimeSeconds ?? this.getElapsedSeconds();
+        this.timerText.setText(`Time: ${elapsedSeconds.toFixed(1)}s`);
     }
 
     private createBeehive (): void
@@ -183,6 +251,10 @@ export class Grass extends Scene
         {
             this.bee.dropOffFlower();
             this.createPollenBurst(beehiveBounds.centerX, beehiveBounds.centerY);
+            if (this.flowers.length === 0)
+            {
+                this.stopTimer();
+            }
         }
     }
 

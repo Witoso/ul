@@ -49,6 +49,7 @@ export class Bee
 
         this.carriedFlowerKey = flowerKey;
         this.setPollenVisible(true);
+        this.updatePollen();
         return true;
     }
 
@@ -58,6 +59,15 @@ export class Bee
         this.carriedFlowerKey = undefined;
         this.setPollenVisible(false);
         return key;
+    }
+
+    setDepth (depth: number): void
+    {
+        this.sprite.setDepth(depth);
+        for (const pollen of this.pollenImages)
+        {
+            pollen.setDepth(depth);
+        }
     }
 
     getBounds (output?: Phaser.Geom.Rectangle): Phaser.Geom.Rectangle

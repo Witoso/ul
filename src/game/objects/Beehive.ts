@@ -10,6 +10,11 @@ export class Beehive
         this.image = scene.add.image(x, y, ASSET_KEYS.Beehive).setScale(scale);
     }
 
+    setPosition (x: number, y: number): void
+    {
+        this.image.setPosition(x, y);
+    }
+
     getBounds (output?: Phaser.Geom.Rectangle): Phaser.Geom.Rectangle
     {
         return this.image.getBounds(output);

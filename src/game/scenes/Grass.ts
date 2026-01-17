@@ -13,8 +13,10 @@ export class Grass extends Scene
     private beehive?: Beehive;
     private flowers: Flower[] = [];
     private readonly boardMargin = 40;
+    private readonly beehiveMargin = 90;
     private readonly beehiveSpacing = 140;
     private readonly flowerSpacing = 60;
+    private readonly beeStartSpacing = 140;
     private readonly flowersCount = 5;
     private readonly beehiveScale = 0.2;
     private readonly flowerScale = 0.3;
@@ -23,7 +25,6 @@ export class Grass extends Scene
     private readonly beeDepth = 2;
     private readonly timerDepth = 1;
     private readonly timerPadding = 12;
-    private readonly timerUpdateMs = 100;
     private readonly flowerKeys = [
         ASSET_KEYS.Clover,
         ASSET_KEYS.Daisy,
@@ -33,8 +34,8 @@ export class Grass extends Scene
     ];
     private timerText?: Phaser.GameObjects.Text;
     private timerEvent?: Phaser.Time.TimerEvent;
-    private timerStartMs?: number;
     private finalTimeSeconds?: number;
+    private lastTimerTenths = -1;
 
     constructor ()
     {
@@ -68,6 +69,7 @@ export class Grass extends Scene
 
         this.checkFlowerPickup();
         this.checkBeehiveDelivery();
+        this.updateTimerText();
     }
 
     private createBackground (): void
@@ -104,15 +106,13 @@ export class Grass extends Scene
 
     private startTimer (): void
     {
-        this.timerStartMs = this.time.now;
+        this.timerEvent?.remove(false);
+        this.finalTimeSeconds = undefined;
+        this.lastTimerTenths = -1;
         this.timerEvent = this.time.addEvent({
-            delay: this.timerUpdateMs,
-            loop: true,
-            callback: () => {
-                this.updateTimerText();
-            }
+            delay: Number.MAX_SAFE_INTEGER
         });
-        this.updateTimerText();
+        this.updateTimerText(true);
     }
 
     private stopTimer (): void
@@ -129,15 +129,10 @@ export class Grass extends Scene
 
     private getElapsedSeconds (): number
     {
-        if (this.timerStartMs === undefined)
-        {
-            return 0;
-        }
-
-        return (this.time.now - this.timerStartMs) / 1000;
+        return this.timerEvent?.getElapsedSeconds() ?? 0;
     }
 
-    private updateTimerText (): void
+    private updateTimerText (force = false): void
     {
         if (!this.timerText)
         {
@@ -145,13 +140,21 @@ export class Grass extends Scene
         }
 
         const elapsedSeconds = this.finalTimeSeconds ?? this.getElapsedSeconds();
-        this.timerText.setText(`Time: ${elapsedSeconds.toFixed(1)}s`);
+        const tenths = Math.floor(elapsedSeconds * 10);
+        if (!force && tenths === this.lastTimerTenths)
+        {
+            return;
+        }
+
+        this.lastTimerTenths = tenths;
+        this.timerText.setText(`Time: ${(tenths / 10).toFixed(1)}s`);
     }
 
     private createBeehive (): void
     {
-        const position = this.getRandomPoint(this.boardMargin);
+        const position = this.getRandomPoint(this.beehiveMargin);
         this.beehive = new Beehive(this, position.x, position.y, this.beehiveScale);
+        this.clampBeehiveToBounds(this.beehiveMargin);
     }
 
     private createFlowers (): void
@@ -161,6 +164,8 @@ export class Grass extends Scene
             return;
         }
 
+        const { width, height } = this.scale.gameSize;
+        const beeStart = new Phaser.Math.Vector2(width * 0.5, height * 0.5);
         const beehiveBounds = this.beehive.getBounds();
         const beehivePosition = new Phaser.Math.Vector2(beehiveBounds.centerX, beehiveBounds.centerY);
         const placedFlowers: Phaser.Math.Vector2[] = [];
@@ -173,7 +178,9 @@ export class Grass extends Scene
                 this.beehiveSpacing,
                 this.boardMargin,
                 placedFlowers,
-                this.flowerSpacing
+                this.flowerSpacing,
+                beeStart,
+                this.beeStartSpacing
             );
             const flower = new Flower(this, position.x, position.y, flowerKey, this.flowerScale);
             this.flowers.push(flower);
@@ -194,7 +201,9 @@ export class Grass extends Scene
         minDistanceFromOrigin: number,
         margin: number,
         existingPoints: Phaser.Math.Vector2[],
-        minDistanceFromPoints: number
+        minDistanceFromPoints: number,
+        avoidPoint?: Phaser.Math.Vector2,
+        avoidDistance = 0
     ): Phaser.Math.Vector2
     {
         const attempts = 12;
@@ -204,13 +213,30 @@ export class Grass extends Scene
         {
             candidate = this.getRandomPoint(margin);
             if (this.isFarEnough(origin, candidate, minDistanceFromOrigin)
-                && this.isFarEnoughFromAll(candidate, existingPoints, minDistanceFromPoints))
+                && this.isFarEnoughFromAll(candidate, existingPoints, minDistanceFromPoints)
+                && (!avoidPoint || this.isFarEnough(avoidPoint, candidate, avoidDistance)))
             {
                 return candidate;
             }
         }
 
         return candidate;
+    }
+
+    private clampBeehiveToBounds (padding: number): void
+    {
+        if (!this.beehive)
+        {
+            return;
+        }
+
+        const { width, height } = this.scale.gameSize;
+        const bounds = this.beehive.getBounds();
+        const halfWidth = bounds.width * 0.5;
+        const halfHeight = bounds.height * 0.5;
+        const clampedX = Phaser.Math.Clamp(bounds.centerX, padding + halfWidth, width - padding - halfWidth);
+        const clampedY = Phaser.Math.Clamp(bounds.centerY, padding + halfHeight, height - padding - halfHeight);
+        this.beehive.setPosition(clampedX, clampedY);
     }
 
     private checkFlowerPickup (): void

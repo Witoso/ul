@@ -30,6 +30,10 @@ export class MainMenu extends Scene
 
         this.startButton.setInteractive({ useHandCursor: true });
         this.startButton.once('pointerdown', () => {
+            if (!this.sound.isPlaying(ASSET_KEYS.Harph))
+            {
+                this.sound.play(ASSET_KEYS.Harph, { loop: true, volume: 0.4 });
+            }
             this.scene.start(SCENE_KEYS.Grass);
         });
     }

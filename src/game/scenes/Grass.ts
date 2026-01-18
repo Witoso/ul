@@ -36,6 +36,8 @@ export class Grass extends Scene
     private timerEvent?: Phaser.Time.TimerEvent;
     private finalTimeSeconds?: number;
     private lastTimerTenths = -1;
+    private bzzSound?: Phaser.Sound.BaseSound;
+    private beeWasMoving = false;
 
     constructor ()
     {
@@ -51,10 +53,15 @@ export class Grass extends Scene
         this.createBeehive();
         this.createFlowers();
         this.createBee();
+        this.createBeeSound();
         this.createWrapRect();
 
         this.input.keyboard?.once('keydown-ESC', () => {
             this.scene.start(SCENE_KEYS.MainMenu);
+        });
+
+        this.events.once('shutdown', () => {
+            this.bzzSound?.stop();
         });
     }
 
@@ -67,6 +74,7 @@ export class Grass extends Scene
             this.bee?.update(dt, this.wrapRect);
         }
 
+        this.updateBeeSound();
         this.checkFlowerPickup();
         this.checkBeehiveDelivery();
         this.updateTimerText();
@@ -91,6 +99,66 @@ export class Grass extends Scene
         this.bee = new Bee(this, width * 0.5, height * 0.5);
         this.bee.setControls(this.cursors);
         this.bee.setDepth(this.beeDepth);
+    }
+
+    private createBeeSound (): void
+    {
+        this.bzzSound = this.sound.addAudioSprite(ASSET_KEYS.Bzz, { volume: 0.6 });
+    }
+
+    private updateBeeSound (): void
+    {
+        if (!this.bee || !this.bzzSound)
+        {
+            return;
+        }
+
+        const isMoving = this.bee.isMoving();
+
+        if (isMoving && !this.beeWasMoving)
+        {
+            this.startBzz();
+        }
+        else if (!isMoving && this.beeWasMoving)
+        {
+            this.stopBzz();
+        }
+
+        this.beeWasMoving = isMoving;
+    }
+
+    private startBzz (): void
+    {
+        if (!this.bzzSound)
+        {
+            return;
+        }
+
+        this.bzzSound.stop();
+        this.bzzSound.off('complete', this.handleBzzComplete, this);
+        this.bzzSound.once('complete', this.handleBzzComplete, this);
+        this.bzzSound.play('bzz_start');
+    }
+
+    private handleBzzComplete (): void
+    {
+        if (!this.bee || !this.bzzSound || !this.bee.isMoving())
+        {
+            return;
+        }
+
+        this.bzzSound.play('bzz_loop', { loop: true });
+    }
+
+    private stopBzz (): void
+    {
+        if (!this.bzzSound)
+        {
+            return;
+        }
+
+        this.bzzSound.off('complete', this.handleBzzComplete, this);
+        this.bzzSound.stop();
     }
 
     private createTimerText (): void

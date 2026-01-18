@@ -19,7 +19,9 @@ export const ASSET_KEYS = {
     Dandelion: 'dandelion',
     Lavender: 'lavender',
     Sunflower: 'sunflower',
-    Pollen: 'pollen'
+    Pollen: 'pollen',
+    Bzz: 'bzz',
+    Harph: 'harph'
 } as const;
 
 export const ANIM_KEYS = {

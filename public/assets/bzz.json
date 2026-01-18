@@ -1,0 +1,14 @@
+{
+    "spritemap": {
+        "bzz_start": {
+            "start": 0,
+            "end": 2,
+            "loop": false
+        },
+        "bzz_loop": {
+            "start": 1.75,
+            "end": 3.75,
+            "loop": true
+        }
+    }
+}

@@ -13,6 +13,7 @@ export class Bee
     private readonly pollenOffsetX = 10;
     private readonly pollenOffsetY = 22;
     private carriedFlowerKey?: string;
+    private moving = false;
 
     constructor (scene: Scene, x: number, y: number)
     {
@@ -33,6 +34,11 @@ export class Bee
         this.handleInput(dt);
         this.wrap(wrapRect);
         this.updatePollen();
+    }
+
+    isMoving (): boolean
+    {
+        return this.moving;
     }
 
     hasFlower (): boolean
@@ -131,10 +137,12 @@ export class Bee
     {
         if (!this.cursors)
         {
+            this.moving = false;
             return;
         }
 
         const { left, right, up } = this.cursors;
+        this.moving = Boolean(up?.isDown);
 
         if (left?.isDown)
         {
@@ -145,7 +153,7 @@ export class Bee
             this.sprite.rotation += this.turnSpeed * dt;
         }
 
-        if (up?.isDown)
+        if (this.moving)
         {
             const heading = this.sprite.rotation - Math.PI / 2;
             this.sprite.x += Math.cos(heading) * this.flySpeed * dt;

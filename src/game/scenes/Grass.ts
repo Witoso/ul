@@ -25,6 +25,13 @@ export class Grass extends Scene
     private readonly beeDepth = 2;
     private readonly timerDepth = 1;
     private readonly timerPadding = 12;
+    private readonly pollenDustDepth = 1;
+    private readonly pollenDustOffset = 26;
+    private readonly pollenDustFrequencyMs = 45;
+    private readonly pollenDustSpeed = 60;
+    private readonly pollenDustSpeedJitter = 30;
+    private readonly pollenDustPositionJitter = 12;
+    private readonly pollenDustPosition = new Phaser.Math.Vector2();
     private readonly flowerKeys = [
         ASSET_KEYS.Clover,
         ASSET_KEYS.Daisy,
@@ -38,6 +45,7 @@ export class Grass extends Scene
     private lastTimerTenths = -1;
     private bzzSound?: Phaser.Sound.BaseSound;
     private beeWasMoving = false;
+    private pollenDustEmitter?: Phaser.GameObjects.Particles.ParticleEmitter;
 
     constructor ()
     {
@@ -53,6 +61,7 @@ export class Grass extends Scene
         this.createBeehive();
         this.createFlowers();
         this.createBee();
+        this.createPollenDust();
         this.createBeeSound();
         this.createWrapRect();
 
@@ -74,6 +83,7 @@ export class Grass extends Scene
             this.bee?.update(dt, this.wrapRect);
         }
 
+        this.updatePollenDust();
         this.updateBeeSound();
         this.checkFlowerPickup();
         this.checkBeehiveDelivery();
@@ -101,9 +111,59 @@ export class Grass extends Scene
         this.bee.setDepth(this.beeDepth);
     }
 
+    private createPollenDust (): void
+    {
+        this.pollenDustEmitter = this.add.particles(0, 0, ASSET_KEYS.PollenDust, {
+            emitting: false,
+            frequency: this.pollenDustFrequencyMs,
+            quantity: { min: 2, max: 4 },
+            lifespan: { min: 900, max: 1400 },
+            speedX: 0,
+            speedY: 0,
+            scale: { start: 0.45, end: 0.08 },
+            alpha: { start: 0.75, end: 0 }
+        });
+        this.pollenDustEmitter.setDepth(this.pollenDustDepth);
+    }
+
     private createBeeSound (): void
     {
         this.bzzSound = this.sound.addAudioSprite(ASSET_KEYS.Bzz, { volume: 0.6 });
+    }
+
+    private updatePollenDust (): void
+    {
+        if (!this.bee || !this.pollenDustEmitter)
+        {
+            return;
+        }
+
+        const position = this.bee.getPosition(this.pollenDustPosition);
+        const rotation = this.bee.getRotation();
+        const heading = rotation - Math.PI / 2;
+        const offsetX = Math.cos(heading) * -this.pollenDustOffset;
+        const offsetY = Math.sin(heading) * -this.pollenDustOffset;
+        const jitterX = Phaser.Math.FloatBetween(-this.pollenDustPositionJitter, this.pollenDustPositionJitter);
+        const jitterY = Phaser.Math.FloatBetween(-this.pollenDustPositionJitter, this.pollenDustPositionJitter);
+        this.pollenDustEmitter.setPosition(position.x + offsetX + jitterX, position.y + offsetY + jitterY);
+
+        const trailAngle = heading + Math.PI;
+        const baseSpeedX = Math.cos(trailAngle) * this.pollenDustSpeed;
+        const baseSpeedY = Math.sin(trailAngle) * this.pollenDustSpeed;
+        const speedJitterX = Phaser.Math.FloatBetween(-this.pollenDustSpeedJitter, this.pollenDustSpeedJitter);
+        const speedJitterY = Phaser.Math.FloatBetween(-this.pollenDustSpeedJitter, this.pollenDustSpeedJitter);
+        this.pollenDustEmitter.speedX = baseSpeedX + speedJitterX;
+        this.pollenDustEmitter.speedY = baseSpeedY + speedJitterY;
+
+        const shouldEmit = this.bee.isMoving() && this.bee.hasFlower();
+        if (shouldEmit && !this.pollenDustEmitter.emitting)
+        {
+            this.pollenDustEmitter.start();
+        }
+        else if (!shouldEmit && this.pollenDustEmitter.emitting)
+        {
+            this.pollenDustEmitter.stop();
+        }
     }
 
     private updateBeeSound (): void

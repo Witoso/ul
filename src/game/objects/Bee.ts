@@ -41,6 +41,18 @@ export class Bee
         return this.moving;
     }
 
+    getPosition (output?: Phaser.Math.Vector2): Phaser.Math.Vector2
+    {
+        const position = output ?? new Phaser.Math.Vector2();
+        position.set(this.sprite.x, this.sprite.y);
+        return position;
+    }
+
+    getRotation (): number
+    {
+        return this.sprite.rotation;
+    }
+
     hasFlower (): boolean
     {
         return Boolean(this.carriedFlowerKey);

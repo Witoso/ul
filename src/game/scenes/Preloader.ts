@@ -44,6 +44,7 @@ export class Preloader extends Scene
         this.load.image(ASSET_KEYS.Lavender, 'lavender.png');
         this.load.image(ASSET_KEYS.Sunflower, 'sunflower.png');
         this.load.image(ASSET_KEYS.Pollen, 'pollen.png');
+        this.load.image(ASSET_KEYS.PollenDust, 'pollen_dust.png');
         this.load.audioSprite(ASSET_KEYS.Bzz, 'bzz.json', 'bzz.wav');
         this.load.audio(ASSET_KEYS.Harph, 'harph.wav');
     }

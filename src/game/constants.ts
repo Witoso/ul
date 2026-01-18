@@ -20,6 +20,7 @@ export const ASSET_KEYS = {
     Lavender: 'lavender',
     Sunflower: 'sunflower',
     Pollen: 'pollen',
+    PollenDust: 'pollen-dust',
     Bzz: 'bzz',
     Harph: 'harph'
 } as const;
